@@ -5,7 +5,21 @@ interface Point {
   y: number;
 }
 
-export function generateBlobPoints(edges: number, smoothness: number, radius = 60): Point[] {
+interface BlobOptions {
+  width?: number;
+  height?: number;
+  centerX?: number;
+  centerY?: number;
+}
+
+export function generateBlobPoints(
+  edges: number,
+  smoothness: number,
+  radius = 60,
+  options: BlobOptions = {},
+): Point[] {
+  const { width = 1, height = 1, centerX = 150, centerY = 150 } = options;
+
   const points: Point[] = [];
   const angleStep = (Math.PI * 2) / edges;
   const startAngle = Math.random() * Math.PI * 2;
@@ -22,11 +36,11 @@ export function generateBlobPoints(edges: number, smoothness: number, radius = 6
     const randomRadius = radius * radiusFactor * (1 + (Math.random() - 0.5) * baseOffset);
     const randomAngle = angle + (Math.random() - 0.5) * angleVariation;
 
-    const perfectX = Math.cos(angle) * radius + 150;
-    const perfectY = Math.sin(angle) * radius + 150;
+    const perfectX = Math.cos(angle) * radius * width + centerX;
+    const perfectY = Math.sin(angle) * radius * height + centerY;
 
-    const randomX = Math.cos(randomAngle) * randomRadius + 150;
-    const randomY = Math.sin(randomAngle) * randomRadius + 150;
+    const randomX = Math.cos(randomAngle) * randomRadius * width + centerX;
+    const randomY = Math.sin(randomAngle) * randomRadius * height + centerY;
 
     points.push({
       x: perfectX * smoothness + randomX * (1 - smoothness),

@@ -17,6 +17,8 @@ export interface BlobConfig {
   color2: string;
   gradientAngle: number;
   path: string;
+  width: number;
+  height: number;
 }
 
 interface BlobEditorProps {
@@ -29,19 +31,21 @@ type FillType = 'gradient' | 'solid' | 'outline';
 export function BlobEditor({ onAdd, onCancel }: BlobEditorProps) {
   const [edges, setEdges] = useState(5);
   const [smoothness, setSmoothness] = useState(0.5);
+  const [width, setWidth] = useState(1);
+  const [height, setHeight] = useState(1);
   const [fillType, setFillType] = useState<FillType>('gradient');
-  const [color1, setColor1] = useState('#FFA500');
-  const [color2, setColor2] = useState('#FF6347');
+  const [color1, setColor1] = useState('#D3E1EB');
+  const [color2, setColor2] = useState('#FFFFFF');
   const [path, setPath] = useState(() => {
-    const points = generateBlobPoints(edges, smoothness);
+    const points = generateBlobPoints(edges, smoothness, 60, { width, height });
     return pointsToPath(points);
   });
   const [gradientAngle, setGradientAngle] = useState(90);
 
   const regenerateBlob = useCallback(() => {
-    const points = generateBlobPoints(edges, smoothness);
+    const points = generateBlobPoints(edges, smoothness, 60, { width, height });
     setPath(pointsToPath(points));
-  }, [edges, smoothness]);
+  }, [edges, smoothness, width, height]);
 
   const getFillValue = () => {
     if (fillType === 'gradient') {
@@ -113,6 +117,8 @@ export function BlobEditor({ onAdd, onCancel }: BlobEditorProps) {
       color2,
       gradientAngle,
       path,
+      width,
+      height,
     });
   };
 
@@ -185,6 +191,47 @@ export function BlobEditor({ onAdd, onCancel }: BlobEditorProps) {
             step={0.05}
             className='w-full'
           />
+        </div>
+
+        <div>
+          <h2 className='text-lg font-semibold mb-4'>Size</h2>
+          <div className='space-y-6'>
+            <div>
+              <div className='flex justify-between mb-2'>
+                <Label>Width</Label>
+                <span className='text-sm text-muted-foreground'>{(width * 100).toFixed(0)}%</span>
+              </div>
+              <Slider
+                value={[width]}
+                onValueChange={([value]) => {
+                  setWidth(value);
+                  regenerateBlob();
+                }}
+                min={0.5}
+                max={2}
+                step={0.1}
+                className='w-full'
+              />
+            </div>
+
+            <div>
+              <div className='flex justify-between mb-2'>
+                <Label>Height</Label>
+                <span className='text-sm text-muted-foreground'>{(height * 100).toFixed(0)}%</span>
+              </div>
+              <Slider
+                value={[height]}
+                onValueChange={([value]) => {
+                  setHeight(value);
+                  regenerateBlob();
+                }}
+                min={0.5}
+                max={2}
+                step={0.1}
+                className='w-full'
+              />
+            </div>
+          </div>
         </div>
 
         <div>
