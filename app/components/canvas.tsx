@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Trash2, RotateCw } from 'lucide-react';
+import { Trash2, RotateCw, Maximize2 } from 'lucide-react';
 import type { BlobConfig } from './blob-editor';
 import { Button } from './ui/button';
 import { Slider } from './ui/slider';
@@ -88,6 +88,19 @@ export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
     setSelectedBlobIndex(selectedBlobIndex === index ? null : index);
   };
 
+  const handleScale = (index: number, scaleFactor: number) => {
+    setBlobsWithPosition((prev) =>
+      prev.map((blob, i) =>
+        i === index
+          ? {
+              ...blob,
+              scale: Math.max(0.2, Math.min(3, blob.scale * scaleFactor)),
+            }
+          : blob,
+      ),
+    );
+  };
+
   return (
     <div className='space-y-4'>
       <div className='flex items-center gap-4'>
@@ -96,7 +109,7 @@ export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
           value={[blurAmount]}
           onValueChange={([value]) => setBlurAmount(value)}
           min={0}
-          max={20}
+          max={100}
           step={0.5}
           className='w-48'
         />
@@ -174,8 +187,35 @@ export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
                 whileHover={{ scale: blob.scale * 1.05 }}
                 whileDrag={{ scale: blob.scale * 1.05 }}
                 style={{ cursor: selectedBlobIndex === index ? 'grab' : 'pointer' }}
-                dragConstraints={getDragConstraints(index)}
               />
+
+              {selectedBlobIndex === index && (
+                <g>
+                  <motion.circle
+                    cx={blob.x + 50}
+                    cy={blob.y + 50}
+                    r={6}
+                    fill='white'
+                    stroke='black'
+                    strokeWidth={1}
+                    style={{ cursor: 'nw-resize' }}
+                    drag
+                    dragMomentum={false}
+                    onDrag={(_, info) => {
+                      const center = { x: blob.x, y: blob.y };
+                      const point = { x: info.point.x, y: info.point.y };
+
+                      const originalDistance = Math.sqrt(50 * 50 + 50 * 50);
+                      const newDistance = Math.sqrt(
+                        Math.pow(point.x - center.x, 2) + Math.pow(point.y - center.y, 2),
+                      );
+
+                      const scaleFactor = newDistance / originalDistance;
+                      handleScale(index, scaleFactor);
+                    }}
+                  />
+                </g>
+              )}
             </motion.g>
           ))}
         </svg>
@@ -190,6 +230,20 @@ export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
               zIndex: 10,
             }}
           >
+            <Button
+              size='icon'
+              variant='outline'
+              onClick={() => handleScale(selectedBlobIndex, 1.1)}
+            >
+              <Maximize2 className='w-4 h-4' />
+            </Button>
+            <Button
+              size='icon'
+              variant='outline'
+              onClick={() => handleScale(selectedBlobIndex, 0.9)}
+            >
+              <Maximize2 className='w-4 h-4 scale-75' />
+            </Button>
             <Button
               size='icon'
               variant='outline'
