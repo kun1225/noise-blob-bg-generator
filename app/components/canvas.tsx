@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Trash2, RotateCw } from 'lucide-react';
 import type { BlobConfig } from './blob-editor';
@@ -20,7 +20,7 @@ interface CanvasProps {
 
 export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null);
-
+  const blobRefs = useRef<(SVGGElement | null)[]>([]);
   const [blobsWithPosition, setBlobsWithPosition] = useState<BlobWithPosition[]>(() =>
     blobs.map((blob) => ({
       ...blob,
@@ -31,6 +31,25 @@ export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
     })),
   );
   const [selectedBlobIndex, setSelectedBlobIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    blobRefs.current = blobRefs.current.slice(0, blobsWithPosition.length);
+  }, [blobsWithPosition.length]);
+
+  const getDragConstraints = (index: number) => {
+    const svg = svgRef.current;
+    const blob = blobRefs.current[index];
+    if (!svg || !blob) return { top: 0, left: 0, right: 0, bottom: 0 };
+
+    const blobBounds = blob.getBBox();
+
+    return {
+      left: -blobBounds.x,
+      top: -blobBounds.y,
+      right: svg.clientWidth - blobBounds.width,
+      bottom: svg.clientHeight - blobBounds.height,
+    };
+  };
 
   if (blobs.length !== blobsWithPosition.length) {
     setBlobsWithPosition((prev) => [
@@ -71,7 +90,13 @@ export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
     <div className='w-full aspect-video bg-gray-50 rounded-lg relative overflow-hidden'>
       <svg ref={svgRef} className='w-full h-full' viewBox='0 0 1000 600'>
         {blobsWithPosition.map((blob, index) => (
-          <motion.g key={index} onClick={() => handleBlobClick(index)}>
+          <motion.g
+            key={index}
+            ref={(el: SVGGElement | null) => {
+              blobRefs.current[index] = el;
+            }}
+            onClick={() => handleBlobClick(index)}
+          >
             {blob.fillType === 'gradient' && (
               <defs>
                 <linearGradient
@@ -121,7 +146,7 @@ export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
               whileHover={{ scale: blob.scale * 1.05 }}
               whileDrag={{ scale: blob.scale * 1.05 }}
               style={{ cursor: selectedBlobIndex === index ? 'grab' : 'pointer' }}
-              dragConstraints={svgRef}
+              dragConstraints={getDragConstraints(index)}
             />
           </motion.g>
         ))}
