@@ -2,8 +2,8 @@ import { useEffect, useRef } from 'react';
 
 interface NoiseTextureProps {
   opacity?: number;
-  size?: number; // 噪點大小
-  intensity?: number; // 噪點強度
+  size?: number;
+  intensity?: number;
 }
 
 export const NoiseTexture = ({ opacity = 0.05, size = 1, intensity = 1 }: NoiseTextureProps) => {

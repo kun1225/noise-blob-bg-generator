@@ -1,5 +1,3 @@
-import { randomInt } from './utils';
-
 interface Point {
   x: number;
   y: number;

@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Canvas } from '@/components/canvas';
-import { BlobEditor, type BlobConfig } from '@/components/blob-editor';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+
+import { Canvas } from './components/canvas';
+import { BlobEditor, type BlobConfig } from './components/blob-editor';
 
 export function PageHome() {
   const [isOpen, setIsOpen] = useState(false);
@@ -26,6 +27,7 @@ export function PageHome() {
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className='max-w-4xl'>
+          <DialogTitle>Create a new blob</DialogTitle>
           <BlobEditor onAdd={handleAddBlob} onCancel={() => setIsOpen(false)} />
         </DialogContent>
       </Dialog>

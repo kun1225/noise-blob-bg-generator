@@ -3,13 +3,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Trash2, RotateCw, Maximize2 } from 'lucide-react';
-import type { BlobConfig } from './blob-editor';
-import { Button } from './ui/button';
-import { Slider } from './ui/slider';
-import { Label } from './ui/label';
-import { Input } from './ui/input';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { NoiseTexture } from './noise-texture';
+
+import type { BlobConfig } from './blob-editor';
 
 interface BlobWithPosition extends BlobConfig {
   x: number;
