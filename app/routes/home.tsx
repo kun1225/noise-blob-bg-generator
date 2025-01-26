@@ -22,7 +22,7 @@ export default function Home() {
         <Button onClick={() => setIsOpen(true)}>Add Blob</Button>
       </div>
 
-      <Canvas blobs={blobs} />
+      <Canvas blobs={blobs} setBlobs={setBlobs} />
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent className='max-w-4xl'>

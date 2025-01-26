@@ -27,10 +27,11 @@ interface CanvasBackground {
 
 interface CanvasProps {
   blobs: BlobConfig[];
+  setBlobs: (value: React.SetStateAction<BlobConfig[]>) => void;
   onBlobsChange?: (blobs: BlobConfig[]) => void;
 }
 
-export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
+export function Canvas({ blobs, setBlobs, onBlobsChange }: CanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null);
   const blobRefs = useRef<(SVGGElement | null)[]>([]);
   const [blobsWithPosition, setBlobsWithPosition] = useState<BlobWithPosition[]>(() =>
@@ -60,18 +61,22 @@ export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
     blobRefs.current = blobRefs.current.slice(0, blobsWithPosition.length);
   }, [blobsWithPosition.length]);
 
-  if (blobs.length !== blobsWithPosition.length) {
-    setBlobsWithPosition((prev) => [
-      ...prev,
-      ...blobs.slice(prev.length).map((blob) => ({
-        ...blob,
-        x: 500,
-        y: 300,
-        scale: 1,
-        rotation: 0,
-      })),
-    ]);
-  }
+  useEffect(() => {
+    if (blobs.length < blobsWithPosition.length) {
+      setBlobsWithPosition((prev) => prev.filter((_, index) => index < blobs.length));
+    } else if (blobs.length > blobsWithPosition.length) {
+      setBlobsWithPosition((prev) => [
+        ...prev,
+        ...blobs.slice(prev.length).map((blob) => ({
+          ...blob,
+          x: 500,
+          y: 300,
+          scale: 1,
+          rotation: 0,
+        })),
+      ]);
+    }
+  }, [blobs.length, blobsWithPosition.length]);
 
   const handleRotate = (index: number, direction: 1 | -1) => {
     setBlobsWithPosition((prev) =>
@@ -85,10 +90,13 @@ export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
       ),
     );
   };
-
   const handleDelete = (index: number) => {
-    setBlobsWithPosition((prev) => prev.filter((_, i) => i !== index));
+    setBlobs((prev) => prev.filter((_, i) => i !== index));
     setSelectedBlobIndex(null);
+    if (onBlobsChange) {
+      const updatedBlobs = blobs.filter((_, i) => i !== index);
+      onBlobsChange(updatedBlobs);
+    }
   };
 
   const handleBlobClick = (index: number) => {
