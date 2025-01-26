@@ -6,12 +6,22 @@ import { Trash2, RotateCw, Maximize2 } from 'lucide-react';
 import type { BlobConfig } from './blob-editor';
 import { Button } from './ui/button';
 import { Slider } from './ui/slider';
+import { Label } from './ui/label';
+import { Input } from './ui/input';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
 
 interface BlobWithPosition extends BlobConfig {
   x: number;
   y: number;
   scale: number;
   rotation: number;
+}
+
+interface CanvasBackground {
+  type: 'solid' | 'gradient';
+  color1: string;
+  color2: string;
+  angle: number;
 }
 
 interface CanvasProps {
@@ -33,6 +43,12 @@ export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
   );
   const [selectedBlobIndex, setSelectedBlobIndex] = useState<number | null>(null);
   const [blurAmount, setBlurAmount] = useState(0);
+  const [background, setBackground] = useState<CanvasBackground>({
+    type: 'solid',
+    color1: '#ffffff',
+    color2: '#f0f0f0',
+    angle: 90,
+  });
 
   useEffect(() => {
     blobRefs.current = blobRefs.current.slice(0, blobsWithPosition.length);
@@ -101,6 +117,17 @@ export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
     );
   };
 
+  const getBackgroundStyle = () => {
+    if (background.type === 'solid') {
+      return { backgroundColor: background.color1 };
+    }
+
+    const angle = background.angle;
+    return {
+      background: `linear-gradient(${angle}deg, ${background.color1}, ${background.color2})`,
+    };
+  };
+
   return (
     <div className='space-y-4'>
       <div className='flex items-center gap-4'>
@@ -115,7 +142,87 @@ export function Canvas({ blobs, onBlobsChange }: CanvasProps) {
         />
       </div>
 
-      <div className='w-full aspect-video bg-gray-50 rounded-lg relative overflow-hidden'>
+      <div className='space-y-4 p-4 border rounded-lg'>
+        <h3 className='font-medium'>Background</h3>
+        <RadioGroup
+          value={background.type}
+          onValueChange={(value: 'solid' | 'gradient') =>
+            setBackground((prev) => ({ ...prev, type: value }))
+          }
+          className='flex gap-4'
+        >
+          <div className='flex items-center space-x-2'>
+            <RadioGroupItem value='solid' id='solid' />
+            <Label htmlFor='solid'>Solid</Label>
+          </div>
+          <div className='flex items-center space-x-2'>
+            <RadioGroupItem value='gradient' id='gradient' />
+            <Label htmlFor='gradient'>Gradient</Label>
+          </div>
+        </RadioGroup>
+
+        <div className='flex gap-4'>
+          <div className='flex-1'>
+            <Label className='block mb-2'>
+              {background.type === 'gradient' ? 'Start Color' : 'Color'}
+            </Label>
+            <div className='flex gap-2'>
+              <div
+                className='w-10 h-10 rounded-lg border'
+                style={{ backgroundColor: background.color1 }}
+              />
+              <Input
+                type='color'
+                value={background.color1}
+                onChange={(e) => setBackground((prev) => ({ ...prev, color1: e.target.value }))}
+                className='h-10 w-full'
+              />
+            </div>
+          </div>
+
+          {background.type === 'gradient' && (
+            <>
+              <div className='flex-1'>
+                <Label className='block mb-2'>End Color</Label>
+                <div className='flex gap-2'>
+                  <div
+                    className='w-10 h-10 rounded-lg border'
+                    style={{ backgroundColor: background.color2 }}
+                  />
+                  <Input
+                    type='color'
+                    value={background.color2}
+                    onChange={(e) => setBackground((prev) => ({ ...prev, color2: e.target.value }))}
+                    className='h-10 w-full'
+                  />
+                </div>
+              </div>
+
+              <div className='flex-1'>
+                <Label className='block mb-2'>Angle</Label>
+                <div className='flex gap-4 items-center'>
+                  <Slider
+                    value={[background.angle]}
+                    onValueChange={([value]) =>
+                      setBackground((prev) => ({ ...prev, angle: value }))
+                    }
+                    min={0}
+                    max={360}
+                    step={1}
+                    className='flex-1'
+                  />
+                  <span className='w-12 text-sm'>{background.angle}°</span>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div
+        className='w-full aspect-video bg-gray-50 rounded-lg relative overflow-hidden'
+        style={getBackgroundStyle()}
+      >
         <svg width='0' height='0'>
           <defs>
             <filter id='canvas-blur'>
