@@ -1,9 +1,11 @@
+import { randomInt } from './utils';
+
 interface Point {
   x: number;
   y: number;
 }
 
-export function generateBlobPoints(edges: number, smoothness: number, radius = 50): Point[] {
+export function generateBlobPoints(edges: number, smoothness: number, radius = 60): Point[] {
   const points: Point[] = [];
   const angleStep = (Math.PI * 2) / edges;
   const startAngle = Math.random() * Math.PI * 2;
@@ -16,15 +18,15 @@ export function generateBlobPoints(edges: number, smoothness: number, radius = 5
   for (let i = 0; i < edges; i++) {
     const angle = startAngle + i * angleStep;
 
-    const radiusFactor = 1 + (Math.random() - 0.5) * radiusVariation * 2;
+    const radiusFactor = 1 + (Math.random() - 0.5) * radiusVariation * 2.2;
     const randomRadius = radius * radiusFactor * (1 + (Math.random() - 0.5) * baseOffset);
     const randomAngle = angle + (Math.random() - 0.5) * angleVariation;
 
-    const perfectX = Math.cos(angle) * radius + 100;
-    const perfectY = Math.sin(angle) * radius + 100;
+    const perfectX = Math.cos(angle) * radius + 150;
+    const perfectY = Math.sin(angle) * radius + 150;
 
-    const randomX = Math.cos(randomAngle) * randomRadius + 100;
-    const randomY = Math.sin(randomAngle) * randomRadius + 100;
+    const randomX = Math.cos(randomAngle) * randomRadius + 150;
+    const randomY = Math.sin(randomAngle) * randomRadius + 150;
 
     points.push({
       x: perfectX * smoothness + randomX * (1 - smoothness),
